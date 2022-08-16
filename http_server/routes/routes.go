@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,7 +42,7 @@ func InitializeHttpRoutes() *gin.Engine {
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:9000", "https://sandbox.memphis.dev", "http://*", "https://*"},
+		AllowOrigins:     []string{"http://localhost:9000", "https://sandbox.memphis.dev", "http://*", "https://*", "http://localhost:5555", "*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -50,8 +51,12 @@ func InitializeHttpRoutes() *gin.Engine {
 		AllowWebSockets:  true,
 		AllowFiles:       true,
 	}))
+
+	router.Use(static.Serve("/", static.LocalFile("./../../memphis-ui/build", true)))
+
 	mainRouter := router.Group("/api")
 	mainRouter.Use(middlewares.Authenticate)
+	router.Use(middlewares.Authenticate)
 
 	utils.InitializeValidations()
 	InitializeUserMgmtRoutes(mainRouter)
